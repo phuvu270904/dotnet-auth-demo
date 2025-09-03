@@ -1,0 +1,48 @@
+# Build results
+bin/
+obj/
+out/
+
+# Visual Studio files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+
+# Entity Framework Core
+Migrations/          # ❗ Optional: ignore if you don't want migration history in git
+*.db                 # local SQLite dbs (if any)
+
+# Configuration
+appsettings.Development.json  # local dev secrets (keep out of git)
+appsettings.Local.json        # (if you use custom local settings)
+
+# Rider / JetBrains IDE
+.idea/
+
+# Coverage / Testing
+*.coverage
+*.coveragexml
+TestResult.xml
+TestResults/
+coverage*.json
+coverage*.xml
+coverage*.info
