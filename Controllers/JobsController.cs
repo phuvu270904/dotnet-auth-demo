@@ -69,8 +69,12 @@ public class JobsController : ControllerBase
     public IActionResult Delete(int id)
     {
         var taskToDelete = _db.Jobs.Find(id);
+        if (taskToDelete == null)
+        {
+            return NotFound(new { Message = "Job not found" });
+        }
         _db.Jobs.Remove(taskToDelete);
         _db.SaveChanges();
-        return Ok();
+        return Ok(new { message = "Job deleted successfully" });
     }
 }
