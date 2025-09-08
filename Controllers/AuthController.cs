@@ -3,6 +3,7 @@ using MyWebApi.Models;
 using MyWebApi.Services;
 using MyWebApi.Data;
 using Microsoft.AspNetCore.Authorization;
+using MyWebApi.DTOs.Auth;
 
 namespace MyWebApi.Controllers;
 
@@ -38,11 +39,15 @@ public class AuthController : ControllerBase
         return Ok("User registered successfully");
     }
 
+    
+    /// <summary>
+    /// Login with username and password
+    /// </summary>
     [HttpPost("login")]
-    public IActionResult Login([FromBody] User login)
+    public IActionResult Login([FromBody] LoginRequestDto loginRequestDto)
     {
         var user = _db.Users.FirstOrDefault(u =>
-            u.Username == login.Username && u.Password == login.Password);
+            u.Username == loginRequestDto.username && u.Password == loginRequestDto.password);
 
         if (user == null) return Unauthorized("Invalid credentials");
 
