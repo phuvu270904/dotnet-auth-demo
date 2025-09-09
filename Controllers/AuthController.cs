@@ -4,6 +4,7 @@ using MyWebApi.Services;
 using MyWebApi.Data;
 using Microsoft.AspNetCore.Authorization;
 using MyWebApi.DTOs.Auth;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyWebApi.Controllers;
 
@@ -26,15 +27,15 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult Register([FromBody] User newUser)
+    public async Task<IActionResult> Register([FromBody] User newUser)
     {
-        if (_db.Users.Any(u => u.Username == newUser.Username))
+        if (await _db.Users.AnyAsync(u => u.Username == newUser.Username))
         {
             return BadRequest("Username already exists");
         }
 
-        _db.Users.Add(newUser);
-        _db.SaveChanges();
+        await _db.Users.AddAsync(newUser);
+        await _db.SaveChangesAsync();
 
         return Ok("User registered successfully");
     }
@@ -44,9 +45,9 @@ public class AuthController : ControllerBase
     /// Login with username and password
     /// </summary>
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequestDto loginRequestDto)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
     {
-        var user = _db.Users.FirstOrDefault(u =>
+        var user = await _db.Users.FirstOrDefaultAsync(u =>
             u.Username == loginRequestDto.username && u.Password == loginRequestDto.password);
 
         if (user == null) return Unauthorized("Invalid credentials");
@@ -75,7 +76,7 @@ public class AuthController : ControllerBase
     [Authorize(Roles = "Admin")]
     [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult SearchUsers([FromQuery] string? keyword)
+    public async Task<IActionResult> SearchUsers([FromQuery] string? keyword)
     {
         var query = _db.Users.AsQueryable();
 
@@ -84,6 +85,6 @@ public class AuthController : ControllerBase
             query = query.Where(u => u.Username.Contains(keyword));
         }
 
-        return Ok(query.ToList());
+        return Ok(await query.ToListAsync());
     }
 }

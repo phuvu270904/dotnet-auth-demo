@@ -24,9 +24,9 @@ public class JobsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public IActionResult Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var task = _db.Jobs.Find(id);
+        var task = await _db.Jobs.FindAsync(id);
         if (task == null)
         {
             return NotFound();
@@ -35,17 +35,17 @@ public class JobsController : ControllerBase
     }
 
     [HttpPost()]
-    public IActionResult Post([FromBody] Job job)
+    public async Task<IActionResult> Post([FromBody] Job job)
     {
-        _db.Jobs.Add(job);
-        _db.SaveChanges();
+        await _db.Jobs.AddAsync(job);
+        await _db.SaveChangesAsync();
         return Ok(job);
     }
 
     [HttpPatch("{id}")]
-    public IActionResult Patch(int id, [FromBody] JobRequestDto jobRequestDto)
+    public async Task<IActionResult> Patch(int id, [FromBody] JobRequestDto jobRequestDto)
     {
-        var taskToUpdate = _db.Jobs.Find(id);
+        var taskToUpdate = await _db.Jobs.FindAsync(id);
         _db.Jobs.Update(taskToUpdate);
         
         if (jobRequestDto.Tasks != null)
@@ -60,21 +60,21 @@ public class JobsController : ControllerBase
             Tasks = taskToUpdate.Tasks,
             Description = taskToUpdate.Description,
         };
-        
-        _db.SaveChanges();
+
+        await _db.SaveChangesAsync();
         return Ok(response);
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var taskToDelete = _db.Jobs.Find(id);
+        var taskToDelete = await _db.Jobs.FindAsync(id);
         if (taskToDelete == null)
         {
             return NotFound(new { Message = "Job not found" });
         }
         _db.Jobs.Remove(taskToDelete);
-        _db.SaveChanges();
+        await _db.SaveChangesAsync();
         return Ok(new { message = "Job deleted successfully" });
     }
 }
