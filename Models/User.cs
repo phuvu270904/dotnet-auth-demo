@@ -6,7 +6,7 @@ public class User
 {
     [Key]
     public int Id { get; set; }
-    
+
     [Required]
     public string Username { get; set; } = string.Empty;
 
@@ -15,4 +15,6 @@ public class User
 
     [Required]
     public string Role { get; set; } = "User"; 
+    
+    public ICollection<Job>? Jobs { get; set; } = new List<Job>();
 }
