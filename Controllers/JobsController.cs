@@ -1,4 +1,7 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyWebApi.Data;
 using MyWebApi.DTOs.Jobs.Request;
 using MyWebApi.DTOs.Jobs.Response;
@@ -7,6 +10,7 @@ using MyWebApi.Models;
 namespace MyWebApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class JobsController : ControllerBase
 {
@@ -18,9 +22,22 @@ public class JobsController : ControllerBase
     }
 
     [HttpGet()]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        return Ok(_db.Jobs.ToList());
+        var jobs = await _db.Jobs
+            .Include(j => j.User)
+            .Select(j => new {
+                j.Id,
+                j.Tasks,
+                j.Description,
+                CreatedBy = new {
+                    j.User!.Id,
+                    j.User.Username,
+                }
+            })
+            .ToListAsync();
+
+        return Ok(jobs);
     }
 
     [HttpGet("{id}")]
@@ -35,11 +52,24 @@ public class JobsController : ControllerBase
     }
 
     [HttpPost()]
-    public async Task<IActionResult> Post([FromBody] Job job)
+    public async Task<IActionResult> Post([FromBody] JobRequestDto jobRequestDto)
     {
+        var job = new Job
+        {
+            Tasks = jobRequestDto.Tasks,
+            Description = jobRequestDto.Description,
+            CreatedBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))
+        };
         await _db.Jobs.AddAsync(job);
         await _db.SaveChangesAsync();
-        return Ok(job);
+        var response = new JobResponseDto
+        {
+            Id = job.Id,
+            Tasks = job.Tasks,
+            Description = job.Description,
+            CreatedBy = job.CreatedBy
+        };
+        return Ok(response);
     }
 
     [HttpPatch("{id}")]
@@ -59,6 +89,7 @@ public class JobsController : ControllerBase
             Id = id,
             Tasks = taskToUpdate.Tasks,
             Description = taskToUpdate.Description,
+            CreatedBy = taskToUpdate.CreatedBy
         };
 
         await _db.SaveChangesAsync();

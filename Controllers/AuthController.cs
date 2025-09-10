@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
 
         if (user == null) return Unauthorized("Invalid credentials");
 
-        var token = _jwt.GenerateToken(user.Username, user.Role);
+        var token = _jwt.GenerateToken(user.Id, user.Username, user.Role);
         return Ok(new { token });
     }
 

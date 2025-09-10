@@ -14,10 +14,11 @@ public class JwtService
         _config = config;
     }
 
-    public string GenerateToken(string username, string role)
+    public string GenerateToken(int userId, string username, string role)
     {
         var claims = new[]
         {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Name, username),
             new Claim(ClaimTypes.Role, role)
         };
