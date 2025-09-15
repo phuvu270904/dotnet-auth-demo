@@ -50,6 +50,9 @@ public class AuthController : ControllerBase
         return Ok(new { token });
     }
 
+    /// <summary>
+    /// Check if the user is an admin (Admin only).
+    /// </summary>
     [Authorize(Roles = "Admin")]
     [HttpGet("admin")]
     public IActionResult AdminOnly()
@@ -57,6 +60,9 @@ public class AuthController : ControllerBase
         return Ok("Hello Admin 👑");
     }
 
+    /// <summary>
+    /// Check if the user is a user.
+    /// </summary>
     [Authorize]
     [HttpGet("user")]
     public IActionResult UserOnly()
