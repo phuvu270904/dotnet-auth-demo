@@ -1,6 +1,7 @@
 using System.Text;
 using MyWebApi.Services;
 using MyWebApi.Data;
+using MyWebApi.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +19,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Add JWT service
 builder.Services.AddScoped<JwtService>();
+
+// Add application services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJobService, JobService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,11 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyWebApi.Data;
 using MyWebApi.DTOs.Jobs.Request;
 using MyWebApi.DTOs.Jobs.Response;
-using MyWebApi.Models;
+using MyWebApi.Interfaces;
 
 namespace MyWebApi.Controllers;
 
@@ -14,98 +12,62 @@ namespace MyWebApi.Controllers;
 [Route("api/[controller]")]
 public class JobsController : ControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly IJobService _jobService;
     
-    public JobsController(AppDbContext db)
+    public JobsController(IJobService jobService)
     {
-        _db = db;
+        _jobService = jobService;
     }
 
     [HttpGet()]
     public async Task<IActionResult> Get()
     {
-        var jobs = await _db.Jobs
-            .Include(j => j.User)
-            .Select(j => new {
-                j.Id,
-                j.Tasks,
-                j.Description,
-                CreatedBy = new {
-                    j.User!.Id,
-                    j.User.Username,
-                }
-            })
-            .ToListAsync();
-
+        var jobs = await _jobService.GetAllJobsAsync();
         return Ok(jobs);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var task = await _db.Jobs.FindAsync(id);
-        if (task == null)
+        var job = await _jobService.GetJobByIdAsync(id);
+        if (job == null)
         {
             return NotFound();
         }
-        return Ok(task);
+        return Ok(job);
     }
 
     [HttpPost()]
     public async Task<IActionResult> Post([FromBody] JobRequestDto jobRequestDto)
     {
-        var job = new Job
-        {
-            Tasks = jobRequestDto.Tasks,
-            Description = jobRequestDto.Description,
-            CreatedBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))
-        };
-        await _db.Jobs.AddAsync(job);
-        await _db.SaveChangesAsync();
-        var response = new JobResponseDto
-        {
-            Id = job.Id,
-            Tasks = job.Tasks,
-            Description = job.Description,
-            CreatedBy = job.CreatedBy
-        };
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var response = await _jobService.CreateJobAsync(jobRequestDto, userId);
         return Ok(response);
     }
 
     [HttpPatch("{id}")]
     public async Task<IActionResult> Patch(int id, [FromBody] JobRequestDto jobRequestDto)
     {
-        var taskToUpdate = await _db.Jobs.FindAsync(id);
-        _db.Jobs.Update(taskToUpdate);
+        var response = await _jobService.UpdateJobAsync(id, jobRequestDto);
         
-        if (jobRequestDto.Tasks != null)
-            taskToUpdate.Tasks = jobRequestDto.Tasks;
-
-        if (jobRequestDto.Description != null)
-            taskToUpdate.Description = jobRequestDto.Description;
-
-        var response = new JobResponseDto
+        if (response == null)
         {
-            Id = id,
-            Tasks = taskToUpdate.Tasks,
-            Description = taskToUpdate.Description,
-            CreatedBy = taskToUpdate.CreatedBy
-        };
+            return NotFound(new { Message = "Job not found" });
+        }
 
-        await _db.SaveChangesAsync();
         return Ok(response);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var taskToDelete = await _db.Jobs.FindAsync(id);
-        if (taskToDelete == null)
+        var success = await _jobService.DeleteJobAsync(id);
+        
+        if (!success)
         {
             return NotFound(new { Message = "Job not found" });
         }
-        _db.Jobs.Remove(taskToDelete);
-        await _db.SaveChangesAsync();
+        
         return Ok(new { message = "Job deleted successfully" });
     }
 }
