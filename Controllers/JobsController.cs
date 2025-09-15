@@ -19,6 +19,9 @@ public class JobsController : ControllerBase
         _jobService = jobService;
     }
 
+    /// <summary>
+    /// Get all jobs.
+    /// </summary>
     [HttpGet()]
     public async Task<IActionResult> Get()
     {
@@ -26,6 +29,9 @@ public class JobsController : ControllerBase
         return Ok(jobs);
     }
 
+    /// <summary>
+    /// Get a job by ID.
+    /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
@@ -37,6 +43,9 @@ public class JobsController : ControllerBase
         return Ok(job);
     }
 
+    /// <summary>
+    /// Create a new job.
+    /// </summary>
     [HttpPost()]
     public async Task<IActionResult> Post([FromBody] JobRequestDto jobRequestDto)
     {
@@ -45,6 +54,9 @@ public class JobsController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Update an existing job.
+    /// </summary>
     [HttpPatch("{id}")]
     public async Task<IActionResult> Patch(int id, [FromBody] JobRequestDto jobRequestDto)
     {
@@ -58,6 +70,9 @@ public class JobsController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Delete a job by ID.
+    /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
