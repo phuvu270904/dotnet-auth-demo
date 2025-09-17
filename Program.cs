@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MyWebApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-// Add JWT service
-builder.Services.AddScoped<JwtService>();
-
-// Add application services
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddApplicationServices();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
